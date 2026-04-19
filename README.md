@@ -90,6 +90,26 @@ Claude will scaffold it. If you're more interested in **how Skills work** than i
 
 ---
 
+## How this works
+
+**What it reads.** The Figma REST API returns JSON — a tree of nodes that describes layout, typography, colors, spacing, and component structure. It does not return pixel data directly. Claude reads this JSON to understand what to build.
+
+**How images work.** To visually reference a frame, the skill requests a rendered PNG from Figma's image export endpoint. This returns a signed S3 URL pointing to the render. Because Claude's `Read` tool only works on local file paths — not remote URLs — the image is first downloaded to a local temp directory, then read from there.
+
+The temp directory used depends on your OS:
+
+| OS | Path |
+|---|---|
+| macOS | `/tmp/figma-images/` |
+| Linux | `/tmp/figma-images/` |
+| Windows | `$env:TEMP\figma-images\` (e.g. `C:\Users\you\AppData\Local\Temp\figma-images\`) |
+
+These locations are ephemeral — cleared on reboot or under memory pressure. Nothing is stored permanently.
+
+**Why both?** JSON gives Claude the structure it needs to write code (layout mode, spacing, colors, typography). The rendered image gives it visual ground truth to self-correct against. The two together produce much better output than either alone.
+
+---
+
 ## Why this instead of the Figma MCP?
 
 The official Figma MCPs are great, but they have access constraints:

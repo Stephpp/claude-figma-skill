@@ -112,9 +112,29 @@ curl -sS -H "X-Figma-Token: $FIGMA_TOKEN" \
   | jq -r '.images | to_entries[0].value'
 ```
 
-This returns a signed S3 URL (valid for ~30 days). Use the Read tool on the URL to actually view the image — do not just pass the URL to the user as a description. Seeing the rendered design alongside the JSON dramatically improves implementation accuracy.
+This returns a signed S3 URL (valid for ~30 days). The `Read` tool cannot open remote URLs — download the image to a local temp path first, then use the `Read` tool on that path.
 
-Use `scale=2` for crisp renders. Use `format=svg` for icons or vector-heavy frames.
+Detect the OS and set the temp directory accordingly:
+
+```bash
+# macOS / Linux
+FIGMA_TMP="/tmp/figma-images"
+
+# Windows (PowerShell)
+$FIGMA_TMP = "$env:TEMP\figma-images"
+```
+
+Then download and read:
+
+```bash
+mkdir -p "$FIGMA_TMP"
+curl -sS -o "$FIGMA_TMP/{name}.png" "{s3_url}"
+# Then: Read tool on "$FIGMA_TMP/{name}.png"
+```
+
+For multiple frames, download them in parallel with `&` + `wait` before reading.
+
+Seeing the rendered design alongside the JSON dramatically improves implementation accuracy. Use `scale=2` for crisp renders. Use `format=svg` for icons or vector-heavy frames.
 
 ---
 
