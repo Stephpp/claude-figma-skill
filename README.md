@@ -147,7 +147,7 @@ A few habits that make the difference between "meh, this looks wrong" and "okay,
 
 ## Requirements
 
-- [Claude Code](https://claude.com/product/claude-code) (the skill also works in the Claude desktop app via Settings → Skills)
+- [Claude Code](https://claude.com/product/claude-code)
 - A Figma personal access token (free to generate on any plan)
 - Optional: `jq` for prettier JSON output — the skill works without it
 
@@ -208,15 +208,7 @@ New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\skills\figma
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Stephpp/claude-figma-skill/master/figma/SKILL.md" `
   -OutFile "$env:USERPROFILE\.claude\skills\figma\SKILL.md"
 ```
-
-### Option C — Claude desktop app
-
-1. Download the latest `figma-skill.zip` from the [Releases page](https://github.com/Stephpp/claude-figma-skill/releases)
-2. Open the Claude desktop app → **Settings → Skills**
-3. **Install from file** → select the ZIP
-4. The skill activates immediately, no restart needed
-
-### Option D — VS Code (Claude Code extension)
+### Option C — VS Code (Claude Code extension)
 
 Same as Option A or B — the skill lives in your home directory and the extension picks it up automatically.
 
@@ -359,6 +351,29 @@ On complex files, fetch a specific node rather than the whole file. The skill us
 **Auto-trigger isn't firing**
 Make sure the skill lives at `~/.claude/skills/figma/SKILL.md` — the `commands/` directory only enables the slash command, not auto-trigger.
 
+---
+
+## Updating
+
+If you cloned the repo, pulling the latest version is two commands:
+
+```bash
+cd claude-figma-skill
+git pull
+cp -r figma ~/.claude/skills/figma
+```
+
+On Windows (PowerShell):
+
+```powershell
+cd claude-figma-skill
+git pull
+Copy-Item -Recurse -Force figma "$env:USERPROFILE\.claude\skills\figma"
+```
+
+Restart Claude Code to pick up the changes.
+
+If you used the one-liner install, re-run it to overwrite your local `SKILL.md` with the latest version.
 ---
 
 ## Keep your token safe
