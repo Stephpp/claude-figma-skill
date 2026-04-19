@@ -4,8 +4,6 @@ A [Claude Skill](https://docs.claude.com/en/docs/claude-code/skills) that pulls 
 
 Paste a Figma URL into Claude Code and it will fetch the file, read the node tree, optionally grab a PNG render, and implement the design in your codebase.
 
----
-
 ## Disclaimers
 
 **Why this exists.** I built this because I was tired of hitting the extremely low usage limits on the Figma MCP. It's a workaround, not a replacement — if you have a paid Figma plan and a Dev seat, the official MCP will give you nicer, more semantic design-to-code output than raw REST JSON.
@@ -88,8 +86,6 @@ runtime.
 
 Claude will scaffold it. If you're more interested in **how Skills work** than in just getting Figma access, I'd recommend that route — you'll learn the skill structure, the frontmatter, and the trigger system by building it yourself. This repo is for people who just want a working one they can drop in.
 
----
-
 ## How this works
 
 **What it reads.** The Figma REST API returns JSON — a tree of nodes that describes layout, typography, colors, spacing, and component structure. It does not return pixel data directly. Claude reads this JSON to understand what to build.
@@ -108,8 +104,6 @@ These locations are ephemeral — cleared on reboot or under memory pressure. No
 
 **Why both?** JSON gives Claude the structure it needs to write code (layout mode, spacing, colors, typography). The rendered image gives it visual ground truth to self-correct against. The two together produce much better output than either alone.
 
----
-
 ## Why this instead of the Figma MCP?
 
 The official Figma MCPs are great, but they have access constraints:
@@ -118,8 +112,6 @@ The official Figma MCPs are great, but they have access constraints:
 - The **Remote Dev Mode MCP** needs a Dev or Full seat on a paid Figma plan — not available on free accounts
 
 A personal access token works on any plan, in any editor, with no desktop app. The tradeoff is that raw REST responses are more verbose than MCP output — this skill handles that by limiting fetch depth and pointing Claude at the fields that matter.
-
----
 
 ## What the skill struggles with
 
@@ -136,8 +128,6 @@ This skill gets you ~70% of the way there on a first pass. Knowing where it fall
 - **Pixel-perfect layouts.** Raw REST output is noisier than MCP output, so Claude occasionally miscalculates spacing by a few pixels or misreads alignment intent. The PNG reference helps it self-correct, but you'll still be polishing manually.
 
 - **Icons and custom vector art.** The API returns vector path data, but Claude won't reliably reconstruct complex SVGs. Export icons as SVG via the `/v1/images?format=svg` endpoint, or swap them for equivalents from lucide/heroicons/etc.
-
----
 
 ## Tips for better results
 
@@ -163,15 +153,11 @@ A few habits that make the difference between "meh, this looks wrong" and "okay,
 
 - **Expect to iterate.** First pass is ~70% there. Second pass after targeted feedback ("the padding is off," "this should be a grid not a stack") gets you to ~90%. The last 10% is you, manually, as always.
 
----
-
 ## Requirements
 
 - [Claude Code](https://claude.com/product/claude-code)
 - A Figma personal access token (free to generate on any plan)
 - Optional: `jq` for prettier JSON output — the skill works without it
-
----
 
 ## Step 1 — Generate a Figma token
 
@@ -186,8 +172,6 @@ A few habits that make the difference between "meh, this looks wrong" and "okay,
 7. Click **Generate token** and copy it immediately — Figma won't show it again
 
 > ⚠️ **This token grants read access to every Figma file your account can see**, including team and organization files. Treat it like a password.
-
----
 
 ## Step 2 — Install the skill
 
@@ -231,8 +215,6 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Stephpp/claude-figma-s
 ### Option C — VS Code (Claude Code extension)
 
 Same as Option A or B — the skill lives in your home directory and the extension picks it up automatically.
-
----
 
 ## Step 3 — Add your token
 
@@ -282,8 +264,6 @@ Or:
 echo $FIGMA_TOKEN
 ```
 
----
-
 ## Step 4 — Use it
 
 ### Auto-triggered (just paste a link)
@@ -321,8 +301,6 @@ Export this frame as a PNG: https://www.figma.com/design/abc123/MyApp?node-id=12
 
 The skill will fetch a rendered image URL via the `/v1/images` endpoint.
 
----
-
 ## Finding a node ID
 
 1. Open the file in Figma
@@ -331,8 +309,6 @@ The skill will fetch a rendered image URL via the `/v1/images` endpoint.
 4. Copy the full URL
 
 The skill handles all three common node-id formats: `1-2`, `1:2`, and `1%3A2`.
-
----
 
 ## Supported endpoints
 
@@ -345,8 +321,6 @@ The skill handles all three common node-id formats: `1-2`, `1:2`, and `1%3A2`.
 | Design variables | `GET /v1/files/{fileKey}/variables/local` *(Enterprise plan only)* |
 | Comments | `GET /v1/files/{fileKey}/comments` |
 | File metadata | `GET /v1/files/{fileKey}/meta` |
-
----
 
 ## Troubleshooting
 
@@ -371,8 +345,6 @@ On complex files, fetch a specific node rather than the whole file. The skill us
 **Auto-trigger isn't firing**
 Make sure the skill lives at `~/.claude/skills/figma/SKILL.md` — the `commands/` directory only enables the slash command, not auto-trigger.
 
----
-
 ## Updating
 
 If you cloned the repo, pulling the latest version is two commands:
@@ -393,8 +365,7 @@ Copy-Item -Recurse -Force figma "$env:USERPROFILE\.claude\skills\figma"
 
 Restart Claude Code to pick up the changes.
 
-If you used the one-liner install, re-run it to overwrite your local `SKILL.md` with the latest version.
----
+If you used the one-liner install, re-run it to overwrite your local `SKILL.md` with the latest version
 
 ## Keep your token safe
 
@@ -402,8 +373,6 @@ If you used the one-liner install, re-run it to overwrite your local `SKILL.md` 
 - Don't share it — it reads every file your Figma account can see
 - Revoke anytime in Figma → Settings → Security
 - Rotate periodically if used long-term
-
----
 
 ## License
 
