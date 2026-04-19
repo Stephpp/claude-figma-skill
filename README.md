@@ -105,17 +105,17 @@ A personal access token works on any plan, in any editor, with no desktop app. T
 
 This skill gets you ~70% of the way there on a first pass. Knowing where it falls short upfront will save you frustration later.
 
-**Component variants and states.** If your design uses a Button component with 12 variants (hover, disabled, loading, etc.), the API tells Claude which variant is *currently placed on the canvas* — not the full variant system. Claude will usually get the visible state right and miss the others. Mention other states explicitly if you need them.
+- **Component variants and states.** If your design uses a Button component with 12 variants (hover, disabled, loading, etc.), the API tells Claude which variant is *currently placed on the canvas* — not the full variant system. Claude will usually get the visible state right and miss the others. Mention other states explicitly if you need them.
 
-**Interactions and animations.** Prototype links, hover transitions, and animation specs exist in Figma but won't come through cleanly via REST. Treat the skill as "static design → static code." Anything interactive you'll describe manually.
+- **Interactions and animations.** Prototype links, hover transitions, and animation specs exist in Figma but won't come through cleanly via REST. Treat the skill as "static design → static code." Anything interactive you'll describe manually.
 
-**Nested component instances.** When a frame uses a Card that uses a Button that uses an Icon, Claude sometimes flattens the hierarchy into one big chunk of markup instead of recognizing the reusable structure. Prompt explicitly: *"Identify reusable components before implementing."*
+- **Nested component instances.** When a frame uses a Card that uses a Button that uses an Icon, Claude sometimes flattens the hierarchy into one big chunk of markup instead of recognizing the reusable structure. Prompt explicitly: *"Identify reusable components before implementing."*
 
-**Design tokens.** Unless you're on Figma Enterprise (where `/variables/local` works), the skill can't read your design token system directly. Claude will hardcode color values like `#3B82F6` instead of referencing `var(--color-primary)`. You can work around this by pointing Claude at your existing tokens file and telling it not to hardcode values.
+- **Design tokens.** Unless you're on Figma Enterprise (where `/variables/local` works), the skill can't read your design token system directly. Claude will hardcode color values like `#3B82F6` instead of referencing `var(--color-primary)`. You can work around this by pointing Claude at your existing tokens file and telling it not to hardcode values.
 
-**Pixel-perfect layouts.** Raw REST output is noisier than MCP output, so Claude occasionally miscalculates spacing by a few pixels or misreads alignment intent. The PNG reference helps it self-correct, but you'll still be polishing manually.
+- **Pixel-perfect layouts.** Raw REST output is noisier than MCP output, so Claude occasionally miscalculates spacing by a few pixels or misreads alignment intent. The PNG reference helps it self-correct, but you'll still be polishing manually.
 
-**Icons and custom vector art.** The API returns vector path data, but Claude won't reliably reconstruct complex SVGs. Export icons as SVG via the `/v1/images?format=svg` endpoint, or swap them for equivalents from lucide/heroicons/etc.
+- **Icons and custom vector art.** The API returns vector path data, but Claude won't reliably reconstruct complex SVGs. Export icons as SVG via the `/v1/images?format=svg` endpoint, or swap them for equivalents from lucide/heroicons/etc.
 
 ---
 
@@ -123,27 +123,25 @@ This skill gets you ~70% of the way there on a first pass. Knowing where it fall
 
 A few habits that make the difference between "meh, this looks wrong" and "okay, this is actually usable."
 
-**Feed one frame at a time.** Don't paste a top-level file URL and say "build everything." Pick a specific frame (click it in Figma → copy URL with the `node-id`), implement it, iterate, then move to the next. Smaller scopes = better output and smaller context usage.
+- **Feed one frame at a time.** Don't paste a top-level file URL and say "build everything." Pick a specific frame (click it in Figma → copy URL with the `node-id`), implement it, iterate, then move to the next. Smaller scopes = better output and smaller context usage.
 
-**Give Claude your stack upfront.** Before pasting the Figma URL, tell Claude what you're working with:
+- **Give Claude your stack upfront.** Before pasting the Figma URL, tell Claude what you're working with. This one line saves you a lot of rework:
 
-> *"This is a Next.js + Tailwind project. Use Tailwind classes, match the existing components in `src/components`, and reference the tokens in `tailwind.config.js` — don't hardcode colors."*
+   > *"This is a Next.js + Tailwind project. Use Tailwind classes, match the existing components in `src/components`, and reference the tokens in `tailwind.config.js` — don't hardcode colors."*
 
-This one line saves you a lot of rework.
+- **Use plan mode for anything non-trivial.** In Claude Code, press Shift+Tab to enter plan mode, then paste your Figma link. Claude will propose a plan — which components it'll extract, what files it'll create, how it'll structure the output — before writing any code. Review the plan, adjust, then approve. Much faster than building and then refactoring.
 
-**Use plan mode for anything non-trivial.** In Claude Code, press Shift+Tab to enter plan mode, then paste your Figma link. Claude will propose a plan — which components it'll extract, what files it'll create, how it'll structure the output — before writing any code. Review the plan, adjust, then approve. Much faster than building and then refactoring.
+- **Set up your foundation before using the skill.** If your project is brand new, create your design tokens, base typography, and core reusable components (Button, Input, Card) *yourself* first. Then point Claude at the Figma design and say *"use my existing Button component from `src/components/Button.tsx`, don't create a new one."* Claude is much better at composing existing pieces than inventing a component system from scratch.
 
-**Set up your foundation before using the skill.** If your project is brand new, create your design tokens, base typography, and core reusable components (Button, Input, Card) *yourself* first. Then point Claude at the Figma design and say *"use my existing Button component from `src/components/Button.tsx`, don't create a new one."* Claude is much better at composing existing pieces than inventing a component system from scratch.
+- **Ask for a component plan first on complex screens.**
 
-**Ask for a component plan first on complex screens.**
+   > *"Before coding, list the reusable components you'd extract from this design and how they nest."*
 
-> *"Before coding, list the reusable components you'd extract from this design and how they nest."*
+   This forces Claude to think in terms of reusable pieces instead of flattening everything into one giant component.
 
-This forces Claude to think in terms of reusable pieces instead of flattening everything into one giant component.
+- **Pair with the PNG reference.** The skill already fetches a rendered PNG — make sure Claude actually looks at it. If the output drifts from the design, tell Claude: *"compare your output to the rendered PNG and fix discrepancies."*
 
-**Pair with the PNG reference.** The skill already fetches a rendered PNG — make sure Claude actually looks at it. If the output drifts from the design, tell Claude: *"compare your output to the rendered PNG and fix discrepancies."*
-
-**Expect to iterate.** First pass is ~70% there. Second pass after targeted feedback ("the padding is off," "this should be a grid not a stack") gets you to ~90%. The last 10% is you, manually, as always.
+- **Expect to iterate.** First pass is ~70% there. Second pass after targeted feedback ("the padding is off," "this should be a grid not a stack") gets you to ~90%. The last 10% is you, manually, as always.
 
 ---
 
