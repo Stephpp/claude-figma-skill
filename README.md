@@ -90,15 +90,16 @@ Claude will scaffold it. If you're more interested in **how Skills work** than i
 
 **What it reads.** The Figma REST API returns JSON — a tree of nodes that describes layout, typography, colors, spacing, and component structure. It does not return pixel data directly. Claude reads this JSON to understand what to build.
 
-**How images work.** To visually reference a frame, the skill requests a rendered PNG from Figma's image export endpoint. This returns a signed S3 URL pointing to the render. Because Claude's `Read` tool only works on local file paths — not remote URLs — the image is first downloaded to a local temp directory, then read from there.
+**How images work.** To visually reference a frame, the skill requests a rendered PNG from Figma's image export endpoint. This returns a signed S3 URL. Because Claude's `Read` tool only works on local file paths — not remote URLs — the skill uses a bundled script to download the image to a local temp directory first, then reads it from there.
 
-The temp directory used depends on your OS:
+The skill includes two download scripts in `figma/scripts/`:
 
-| OS | Path |
-|---|---|
-| macOS | `/tmp/figma-images/` |
-| Linux | `/tmp/figma-images/` |
-| Windows | `$env:TEMP\figma-images\` (e.g. `C:\Users\you\AppData\Local\Temp\figma-images\`) |
+| Script | Platform | Saves to |
+|---|---|---|
+| `download-images.sh` | macOS / Linux | `/tmp/figma-images/` |
+| `download-images.ps1` | Windows | `%TEMP%\figma-images\` |
+
+Both accept any number of `name url` pairs. The shell script downloads in parallel; the PowerShell script downloads sequentially. Both print the saved paths when done.
 
 These locations are ephemeral — cleared on reboot or under memory pressure. Nothing is stored permanently.
 

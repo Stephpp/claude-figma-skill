@@ -104,7 +104,7 @@ Surface these as short, actionable messages — do not dump the raw JSON error.
 
 ## Step 4 — Fetch a rendered image (optional, recommended)
 
-For visual reference, especially for complex layouts, fetch a PNG render of the node:
+For visual reference, especially for complex layouts, fetch PNG render URLs from the API:
 
 ```bash
 curl -sS -H "X-Figma-Token: $FIGMA_TOKEN" \
@@ -112,29 +112,27 @@ curl -sS -H "X-Figma-Token: $FIGMA_TOKEN" \
   | jq -r '.images | to_entries[0].value'
 ```
 
-This returns a signed S3 URL (valid for ~30 days). The `Read` tool cannot open remote URLs — download the image to a local temp path first, then use the `Read` tool on that path.
+This returns a signed S3 URL (valid for ~30 days). The `Read` tool cannot open remote URLs — use the bundled script to download images to a local temp directory first, then read them from there.
 
-Detect the OS and set the temp directory accordingly:
-
-```bash
-# macOS / Linux
-FIGMA_TMP="/tmp/figma-images"
-
-# Windows (PowerShell)
-$FIGMA_TMP = "$env:TEMP\figma-images"
-```
-
-Then download and read:
+**macOS / Linux** — use `scripts/download-images.sh`:
 
 ```bash
-mkdir -p "$FIGMA_TMP"
-curl -sS -o "$FIGMA_TMP/{name}.png" "{s3_url}"
-# Then: Read tool on "$FIGMA_TMP/{name}.png"
+bash scripts/download-images.sh <name> <url> [<name> <url> ...]
+# Images saved to /tmp/figma-images/<name>.png
 ```
 
-For multiple frames, download them in parallel with `&` + `wait` before reading.
+**Windows** — use `scripts/download-images.ps1`:
 
-Seeing the rendered design alongside the JSON dramatically improves implementation accuracy. Use `scale=2` for crisp renders. Use `format=svg` for icons or vector-heavy frames.
+```powershell
+.\scripts\download-images.ps1 <name> <url> [<name> <url> ...]
+# Images saved to $env:TEMP\figma-images\<name>.png
+```
+
+Both scripts accept any number of name/url pairs and print the saved paths on completion. Pass all frames at once — the shell script downloads in parallel.
+
+After the script finishes, use the `Read` tool on each local path to view the images. Seeing the rendered design alongside the JSON dramatically improves implementation accuracy.
+
+Use `scale=2` for crisp renders. Use `format=svg` for icons or vector-heavy frames.
 
 ---
 
